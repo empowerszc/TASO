@@ -133,7 +133,8 @@ enum OpType {
   OP_FUSE_CONV_BATCHNORM,
   OP_FUSE_CONV_BATCHNORM_ALPHA_VAR,
   OP_FUSE_CONV_BATCHNORM_BIAS,
-  OP_BROADCAST_ADD
+  OP_BROADCAST_ADD,
+  OP_BROADCAST_POW
 };
 
 struct Op {
@@ -550,6 +551,8 @@ public:
                                    const TensorHandle _var);
   TensorHandle broadcast_add(const TensorHandle _data,
                                    const TensorHandle _bias);
+  TensorHandle broadcast_pow(const TensorHandle _data,
+                                   const TensorHandle _bias);
 
   TensorHandle leakyrelu(const TensorHandle _input, float _alpha,
                          bool _inplace=true);
@@ -946,6 +949,18 @@ public:
   void collect_costs(float& exe_time, float& flops, float& mem_acc, int& num_kernels);
 };
 
+class BroadcastPow : public OpBase {
+    public:
+        BroadcastPow(Model* _model, const Tensor& _data, const Tensor& _bias);
+        ~BroadcastPow(void);
+        bool get_int_parameter(PMParameter para, int*);
+        void forward(bool block);
+        void map(void);
+        void unmap(void);
+        void collect_costs(float& exe_time, float& flops, float& mem_acc, int& num_kernels);
+};
+
+
 class MergeGConv : public OpBase {
 public:
   MergeGConv(Model* _model, const Tensor& _weight, int count);
@@ -1229,6 +1244,13 @@ struct BroadcastAddKey {
   int keys[KEY_LENGTH];
 };
 
+struct BroadcastPowKey {
+        static const int KEY_LENGTH = Tensor::MAX_KEY_LENGTH;
+        BroadcastPowKey(const Tensor& data);
+        int keys[KEY_LENGTH];
+};
+
+
 struct TopKKey {
   static const int KEY_LENGTH = Tensor::MAX_KEY_LENGTH + 4;
   TopKKey(const Tensor& _input, int _axis, int _numk, bool _largest, bool _sorted);
@@ -1380,6 +1402,8 @@ public:
                                        const Tensor& _var);
   Op get_or_create_broadcast_add(const Tensor& _data,
                                  const Tensor& _bias);
+  Op get_or_create_broadcast_pow(const Tensor& _data,
+                                   const Tensor& _bias);
   Op get_or_create_matmul(Tensor _input, Tensor _weight,
                           ActiMode _actimode);
   Op get_or_create_mul(const Tensor& x,
@@ -1489,6 +1513,7 @@ public:
   std::map<FuseConvBatchNormAlphaVarKey, FuseConvBatchNormAlphaVar*, KeyCompare<FuseConvBatchNormAlphaVarKey> > fuse_conv_batchnorm_alpha_var;
   std::map<FuseConvBatchNormBiasKey, FuseConvBatchNormBias*, KeyCompare<FuseConvBatchNormBiasKey> > fuse_conv_batchnorm_bias;
   std::map<BroadcastAddKey, BroadcastAdd*, KeyCompare<BroadcastAddKey> > broadcast_add;
+  std::map<BroadcastPowKey, BroadcastPow*, KeyCompare<BroadcastPowKey> > broadcast_pow;
   std::map<MatmulKey, Matmul*, KeyCompare<MatmulKey> > matmul;
   std::map<MergeGConvKey, MergeGConv*, KeyCompare<MergeGConvKey> > merge_gconv;
   std::map<MulKey, Mul*, KeyCompare<MulKey> > mul;

@@ -51,6 +51,7 @@ cdef extern from "taso/ops.h" namespace "taso":
         OP_TRANSPOSE
         # RNN operators
         OP_EW_ADD
+        OP_EW_POW
         OP_EW_MUL
         OP_MATMUL
         OP_SCALARMUL
@@ -95,7 +96,8 @@ cdef extern from "taso/ops.h" namespace "taso":
         OP_FUSE_CONV_BATCHNORM,
         OP_FUSE_CONV_BATCHNORM_ALPHA_VAR,
         OP_FUSE_CONV_BATCHNORM_BIAS,
-        OP_BROADCAST_ADD
+        OP_BROADCAST_ADD,
+        OP_BROADCAST_POW
 
     # This must be consistent with include/taso/ops.h
     cdef enum PMParameter:
