@@ -50,6 +50,11 @@ void elementwise_kernel(int volume,
         z[id_z] = x[id_x] + y[id_y];
         break;
       }
+      case OP_EW_POW:
+        {
+            z[id_z] = x[id_x] + y[id_y];
+            break;
+        }
       case OP_EW_MUL:
       {
         z[id_z] = x[id_x] * y[id_y];
@@ -105,6 +110,7 @@ bool Element::use_kernel(void) const
 {
   switch (type) {
     case OP_EW_ADD:
+    case OP_EW_POW:
     case OP_EW_MUL:
     case OP_EW_MAX:
     case OP_EW_MIN:
@@ -147,6 +153,9 @@ void Element::map(void)
     switch (type) {
       case OP_EW_ADD:
         opType = CUDNN_OP_TENSOR_ADD;
+        break;
+      case OP_EW_POW:
+        opType = CUDNN_OP_TENSOR_POW;
         break;
       case OP_EW_MUL:
         opType = CUDNN_OP_TENSOR_MUL;
@@ -216,6 +225,9 @@ void Model::measure_element_cost(Element* ele)
     switch (ele->type) {
       case OP_EW_ADD:
         opType = CUDNN_OP_TENSOR_ADD;
+        break;
+      case OP_EW_POW:
+        opType = CUDNN_OP_TENSOR_POW;
         break;
       case OP_EW_MUL:
         opType = CUDNN_OP_TENSOR_MUL;
